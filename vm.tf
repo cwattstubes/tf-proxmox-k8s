@@ -2,11 +2,11 @@ resource "proxmox_virtual_environment_vm" "talos_cp_01" {
   name        = "talos-cp-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
-  node_name   = "saturn"
+  node_name   = "smnode1"
   on_boot     = true
 
   cpu {
-    cores = 4 
+    cores = 2
     type = "host"
   }
 
