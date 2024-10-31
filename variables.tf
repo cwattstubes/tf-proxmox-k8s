@@ -54,12 +54,14 @@ variable "worker_groups" {
       memory       = 2048
       datastore_id = "saturn-nfs"
       disk_size    = 15
-      ip_addresses = ["192.168.200.42", "192.168.200.44"]
+      #ip_addresses = ["192.168.200.42", "192.168.200.44"]
+      ip_addresses = ["192.168.200.42"]
     },
     group2 = {
       node_name    = "smnode1"
       # Omitting some settings to fall back on defaults
-      ip_addresses = ["192.168.200.41", "192.168.200.43"]
+      #ip_addresses = ["192.168.200.41", "192.168.200.43"]
+      ip_addresses = ["192.168.200.41"]
     }
   }
 }
