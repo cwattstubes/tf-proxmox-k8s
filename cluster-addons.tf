@@ -20,7 +20,7 @@ resource "kubernetes_namespace" "ingress_nginx" {
       "pod-security.kubernetes.io/warn"    = "privileged"
     }
   }
-  depends_on = [data.talos_cluster_health.health, local_file.kubeconfig_file]
+  depends_on = [data.talos_cluster_health.health, local_file.kubeconfig_file, proxmox_virtual_environment_vm.talos_worker]
 
 }
 
