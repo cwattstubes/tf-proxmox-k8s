@@ -6,7 +6,7 @@ resource "proxmox_virtual_environment_vm" "talos_cp_01" {
   on_boot     = true
 
   cpu {
-    cores = 2
+    cores = 4 
     type = "host"
   }
 
