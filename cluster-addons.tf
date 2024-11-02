@@ -95,3 +95,86 @@ resource "helm_release" "metrics_server" {
   #depends_on = [kubernetes_namespace.kube_system]  # Ensure kube-system namespace exists
   depends_on = [data.talos_cluster_health.health, local_file.kubeconfig_file, proxmox_virtual_environment_vm.talos_worker]
 }
+
+#### ArgoCD
+
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  namespace  = "argocd"
+
+  create_namespace = true  # Creates the namespace if it doesn’t exist
+
+  values = [
+    yamlencode({
+      server = {
+        service = {
+          type = "ClusterIP"  # Change to NodePort or ClusterIP as needed
+        }
+      }
+    })
+  ]
+
+  # Optional: Configure automatic sync, RBAC, or any other custom values ArgoCD supports
+
+  depends_on = [data.talos_cluster_health.health, local_file.kubeconfig_file, proxmox_virtual_environment_vm.talos_worker]
+
+}
+
+data "kubernetes_secret" "argocd_initial_admin_secret" {
+  metadata {
+    name      = "argocd-initial-admin-secret"
+    namespace = "argocd"
+  }
+}
+
+output "argocd_admin_password" {
+  value     = data.kubernetes_secret.argocd_initial_admin_secret.data["password"]
+  sensitive = true
+}
+
+resource "kubernetes_manifest" "argocd_ingress" {
+  depends_on = [helm_release.argocd]
+  
+  manifest = {
+    "apiVersion" = "networking.k8s.io/v1"
+    "kind"       = "Ingress"
+    "metadata" = {
+      "name"      = "argocd-ingress"
+      "namespace" = "argocd"
+      "annotations" = {
+        "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
+        "nginx.ingress.kubernetes.io/ssl-redirect"     = "true"
+      }
+    }
+    "spec" = {
+      "ingressClassName" = "nginx"
+      "rules" = [{
+        "host" = "argocd.k8s.theintertubes.ca"
+        "http" = {
+          "paths" = [{
+            "path"     = "/"
+            "pathType" = "Prefix"
+            "backend" = {
+              "service" = {
+                "name" = "argocd-server"
+                "port" = {
+                  "number" = 80
+                }
+              }
+            }
+          }]
+        }
+      }]
+      "tls" = [{
+        "hosts"       = ["argocd.k8s.theintertubes.ca"]
+        "secretName"  = "argocd-tls"  # Use your TLS secret if needed
+      }]
+    }
+  }
+}
+
+
+
+
