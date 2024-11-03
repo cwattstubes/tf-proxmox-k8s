@@ -2,11 +2,11 @@ resource "proxmox_virtual_environment_vm" "talos_cp_01" {
   name        = "talos-cp-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
-  node_name   = "smnode1"
+  node_name   = "saturn"
   on_boot     = true
 
   cpu {
-    cores = 2
+    cores = 4
     type = "host"
   }
 
@@ -24,10 +24,15 @@ resource "proxmox_virtual_environment_vm" "talos_cp_01" {
   }
 
   disk {
-    datastore_id = "saturn-nfs"
+    datastore_id = "local"
     file_id      = proxmox_virtual_environment_download_file.talos_nocloud_image.id
-    file_format  = "raw"
+    file_format  = "qcow2"
     interface    = "virtio0"
+    cache        = "none" // Changed to use writeback cache
+    aio          = "threads"    // Changed to use native aio
+    iothread     = true
+    backup       = false
+    replicate    = false           // Enabled iothread
     size         = 20
   }
 
@@ -108,10 +113,14 @@ resource "proxmox_virtual_environment_vm" "talos_worker" {
     datastore_id = each.value.datastore_id
     size         = each.value.disk_size
     file_id      = proxmox_virtual_environment_download_file.talos_nocloud_image.id
-    file_format  = "raw"
+    file_format  = "qcow2"
     interface    = "virtio0"
+    cache        = "none" // Changed to use writeback cache
+    aio          = "native"    // Changed to use native aio
+    iothread     = true
+    backup       = false
+    replicate    = false           // Enabled iothread
   }
-
   initialization {
     datastore_id = each.value.datastore_id
     dns {

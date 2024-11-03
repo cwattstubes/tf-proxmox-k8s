@@ -1,0 +1,13 @@
+server:
+  service:
+    type: ClusterIP
+
+configs:
+#  repositories:
+#    - name: "argoCD repo"
+#      url: "git@github.com:cwattstubes/argocd.git"
+#      sshPrivateKey: argocd-ssh-key
+
+  cm:  # Here you can include custom `argocd-cm` directly.
+    application.instanceLabelKey: "argocd.argoproj.io/instance"
+    # Other custom configurations
