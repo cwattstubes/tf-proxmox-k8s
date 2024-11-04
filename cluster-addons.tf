@@ -107,6 +107,11 @@ resource "helm_release" "metrics_server" {
 resource "kubernetes_namespace" "argocd" {
   metadata {
     name = "argocd"
+    labels = {
+      "pod-security.kubernetes.io/enforce" = "privileged"
+      "pod-security.kubernetes.io/audit"   = "privileged"
+      "pod-security.kubernetes.io/warn"    = "privileged"
+    }
   }
   depends_on = [data.talos_cluster_health.health, local_file.kubeconfig_file, proxmox_virtual_environment_vm.talos_worker]
 
@@ -118,7 +123,7 @@ resource "helm_release" "argocd" {
   chart      = "argo-cd"
   namespace  = "argocd"
 
-  create_namespace = true  # Creates the namespace if it doesn’t exist
+  #create_namespace = true  # Creates the namespace if it doesn’t exist
 
   values = [file("${path.module}/Charts/argocd/values.yaml")]  # Point to your custom values.yaml file
 

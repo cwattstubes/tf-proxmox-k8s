@@ -2,6 +2,29 @@ server:
   service:
     type: ClusterIP
 
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    hostname: "argocd.k8s.theintertubes.ca"
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    rules:
+      - host: argocd.k8s.theintertubes.ca
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: argocd-server
+                  port:
+                    number: 80
+    tls:
+      - hosts:
+          - argocd.k8s.theintertubes.ca
+        secretName: argocd-tls
+
 configs:
 #  repositories:
 #    - name: "argoCD repo"
@@ -11,3 +34,20 @@ configs:
   cm:  # Here you can include custom `argocd-cm` directly.
     application.instanceLabelKey: "argocd.argoproj.io/instance"
     # Other custom configurations
+
+applications:
+  - name: root-app
+    namespace: argocd
+    project: default
+    source:
+      repoURL: git@github.com:cwattstubes/argocd.git
+      targetRevision: main
+      path: Charts/argocd
+      directory:
+        recurse: true
+    destination:
+      server: https://kubernetes.default.svc
+    syncPolicy:
+      automated:
+        prune: false
+        selfHeal: true
