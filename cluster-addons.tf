@@ -76,6 +76,20 @@ resource "helm_release" "nginx_ingress" {
     value = "false"
   }
 
+  set {
+    name  = "controller.metrics.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "controller.metrics.service.annotations.prometheus.io/scrape"
+    value = tostring("true")
+  }
+
+  set {
+    name  = "controller.metrics.service.annotations.prometheus.io/port"
+    value = tostring("10254")
+  }
   depends_on = [kubernetes_namespace.ingress_nginx]  # Wait for namespace before Helm release
 }
 
