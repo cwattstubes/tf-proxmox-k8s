@@ -29,7 +29,7 @@ resource "proxmox_virtual_environment_vm" "talos_cp_01" {
     file_format  = "qcow2"
     interface    = "virtio0"
     cache        = "none" // Changed to use writeback cache
-    aio          = "threads"    // Changed to use native aio
+    aio          = "native"    // Changed to use native aio
     iothread     = true
     backup       = false
     replicate    = false           // Enabled iothread
